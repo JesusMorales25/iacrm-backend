@@ -1,9 +1,3 @@
-# Spring Boot properties y YAML (no subir claves ni credenciales)
-application.properties
-application.yml
-application-*.properties
-application-*.yml
-
 # Archivos de entorno locales
 .env
 *.env
