@@ -56,8 +56,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:8080",
-                "http://localhost:3008",
-                "https://tu-dominio.com"
+                "https://assistant-iacrm-builderbot-production.up.railway.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
