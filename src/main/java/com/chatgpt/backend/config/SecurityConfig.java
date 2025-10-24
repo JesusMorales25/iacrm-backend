@@ -29,6 +29,9 @@ public class SecurityConfig {
     @Value("${bot.api.key}")
     private String botApiKey;
 
+    @Value("${cors.allowed.origins}")
+    private String corsAllowedOrigins;
+
     private final JwtUtil jwtUtil;
     private final org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
 
@@ -54,10 +57,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "https://assistant-iacrm-builderbot-production.up.railway.app",
-								"https://iacrm-app.vercel.app"
-        ));
+        
+        // Convertir la cadena de URLs separadas por comas en una lista
+        String[] originsArray = corsAllowedOrigins.split(",");
+        List<String> allowedOrigins = List.of(originsArray);
+        
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization"));
