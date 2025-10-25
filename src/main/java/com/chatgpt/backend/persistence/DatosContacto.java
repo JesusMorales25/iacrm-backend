@@ -6,9 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
-@Table(name = "datos_contacto", schema = "iacrm")
+@Table(name = "datos_contacto")
+@DynamicInsert
+@DynamicUpdate
 @Data
 @Builder
 @NoArgsConstructor

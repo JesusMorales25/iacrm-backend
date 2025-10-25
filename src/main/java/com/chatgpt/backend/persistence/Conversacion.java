@@ -2,12 +2,16 @@ package com.chatgpt.backend.persistence;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
-@Table(name = "conversacion", schema = "iacrm")
+@Table(name = "conversacion")
+@DynamicInsert
+@DynamicUpdate
 @NoArgsConstructor @AllArgsConstructor
 @Builder
 public class Conversacion {

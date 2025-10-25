@@ -1,6 +1,5 @@
 package com.chatgpt.backend.security;
 
-import com.chatgpt.backend.config.multitenant.TenantContext;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,8 +55,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (jwtUtil.validateToken(token)) {
                 String empresaId = jwtUtil.getEmpresaId(token);
 
-                // Aquí podrías setear el schema de Hibernate para multi-tenancy
-                TenantContext.setCurrentTenant(empresaId);
+                // Nota: empresaId disponible para futuras funcionalidades multi-tenant
+                // Ya no es necesario TenantContext porque usamos esquema público único
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(

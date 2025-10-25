@@ -36,11 +36,35 @@ public class ChatService {
     @Autowired
     private FunctionExecutorService functionExecutorService;
 
+    @Autowired
+    private MessageLimitService messageLimitService;
+
     @Value("${openai.api.key}")
     private String API_KEY;
 
     @Value("${openai.assistant.id}")
     private String ASSISTANT_ID;
+    
+    @Value("${openai.model:gpt-4}")
+    private String OPENAI_MODEL;
+    
+    @Value("${openai.max.tokens:2000}")
+    private int OPENAI_MAX_TOKENS;
+    
+    @Value("${openai.temperature:0.7}")
+    private double OPENAI_TEMPERATURE;
+
+    @Value("${business.max.messages.per.user:100}")
+    private int MAX_MESSAGES_PER_USER;
+    
+    @Value("${business.message.timeout:30}")
+    private int MESSAGE_TIMEOUT_SECONDS;
+    
+    @Value("${business.default.user.category:CURIOSO}")
+    private String DEFAULT_USER_CATEGORY;
+
+    @Value("${business.thread.cleanup.interval:3600}")
+    private int THREAD_CLEANUP_INTERVAL_SECONDS;
 
     @Value("https://api.openai.com/v1/threads")
     private String THREADS_URL;
@@ -80,6 +104,18 @@ public class ChatService {
     }
 
     public String obtenerRespuestaOpenAI(String mensaje, String numero) {
+        // 1. VALIDACIÓN INTELIGENTE DE LÍMITES
+        MessageLimitService.ValidationResult validation = messageLimitService.validateMessage(numero);
+        
+        if (!validation.isAllowed()) {
+            // Si es bloqueo silencioso, simplemente ignorar el mensaje
+            if ("SILENT_LIMIT_REACHED".equals(validation.getCode())) {
+                return null; // No responder nada (transparente para el usuario)
+            }
+            // Si tiene mensaje, enviarlo (para otros tipos de planes)
+            return validation.getMessage();
+        }
+        
         // Obtener o crear el semáforo para este usuario
         Semaphore userSemaphore = userSemaphores.computeIfAbsent(numero, k -> new Semaphore(1));
         
@@ -95,7 +131,14 @@ public class ChatService {
                         return procesarColaCompleta(numero);
                     } else {
                         // Procesar inmediatamente si no hay cola
-                        return procesarMensajeInmediato(mensaje, numero);
+                        String respuesta = procesarMensajeInmediato(mensaje, numero);
+                        
+                        // Agregar warning si existe
+                        if (validation.hasWarning()) {
+                            respuesta = validation.getWarning() + "\n\n" + respuesta;
+                        }
+                        
+                        return respuesta;
                     }
                 } finally {
                     userSemaphore.release();
@@ -187,11 +230,11 @@ public class ChatService {
 
             // Verifica si ya existe el contacto con ese número
             if (!datosContactoRepository.existsByNumeroUsuario(numero)) {
-                // Si no existe, crea el contacto como CURIOSO con threadId
+                // Si no existe, crea el contacto con categoría configurable
                 datosContactoRepository.save(DatosContacto.builder()
                         .numeroUsuario(numero)
                         .threadId(threadId)
-                        .categoria(CategoriaContacto.CURIOSO)
+                        .categoria(obtenerCategoriaDefecto())
                         .build()
                 );
             }
@@ -324,5 +367,31 @@ public class ChatService {
     private Map<String, Object> get(String url, HttpHeaders headers) {
         HttpEntity<Void> request = new HttpEntity<>(headers);
         return restTemplate.exchange(url, HttpMethod.GET, request, Map.class).getBody();
+    }
+
+    /**
+     * Valida si el usuario ha alcanzado el límite máximo de mensajes
+     */
+    private boolean validarLimiteMensajes(String numero) {
+        try {
+            // Contar mensajes del usuario en la base de datos
+            long totalMensajes = conversacionRepository.countByNumero(numero);
+            return totalMensajes < MAX_MESSAGES_PER_USER;
+        } catch (Exception e) {
+            // En caso de error, permitir el mensaje (fail-safe)
+            return true;
+        }
+    }
+
+    /**
+     * Usa la categoría por defecto configurada en lugar de hardcodeada
+     */
+    private CategoriaContacto obtenerCategoriaDefecto() {
+        try {
+            return CategoriaContacto.valueOf(DEFAULT_USER_CATEGORY);
+        } catch (IllegalArgumentException e) {
+            // Si la categoría configurada no es válida, usar CURIOSO por defecto
+            return CategoriaContacto.CURIOSO;
+        }
     }
 }

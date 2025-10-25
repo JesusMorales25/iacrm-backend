@@ -3,9 +3,13 @@ package com.chatgpt.backend.persistence;
 import com.chatgpt.backend.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
-@Table(name = "users", schema = "iacrm")
+@Table(name = "users")
+@DynamicInsert
+@DynamicUpdate
 @Getter
 @Setter
 @NoArgsConstructor

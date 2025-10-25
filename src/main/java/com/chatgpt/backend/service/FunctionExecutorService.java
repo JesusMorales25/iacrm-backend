@@ -30,16 +30,14 @@ import java.util.function.Supplier;
 
     private static final Logger log = LoggerFactory.getLogger(FunctionExecutorService.class);
 
-        @Value("${openai.api.key}")
-        private String openaiApiKey;
+    @Value("${openai.api.key}")
+    private String openaiApiKey;
 
-        @Value("${make.webhookUrl}")
-        private String WEBHOOKURL_MAKE;
+    @Value("${webhook.make.url}")
+    private String WEBHOOKURL_MAKE;
 
-        @Value("${make.webhookUrlGuardarContacto}")
-        private String WEBHOOKURL_GUARDAR_CONTACTO;
-
-        @Autowired
+    @Value("${webhook.save.contact.url}")
+    private String WEBHOOKURL_GUARDAR_CONTACTO;        @Autowired
         private DatosContactoRepository datosContactoRepository;
 
         @Autowired

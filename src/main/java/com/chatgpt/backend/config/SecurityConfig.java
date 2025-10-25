@@ -31,6 +31,15 @@ public class SecurityConfig {
 
     @Value("${cors.allowed.origins}")
     private String corsAllowedOrigins;
+    
+    @Value("${cors.allowed.methods}")
+    private String corsAllowedMethods;
+    
+    @Value("${cors.allowed.headers}")
+    private String corsAllowedHeaders;
+    
+    @Value("${cors.allow.credentials}")
+    private boolean corsAllowCredentials;
 
     private final JwtUtil jwtUtil;
     private final org.springframework.security.core.userdetails.UserDetailsService userDetailsService;
@@ -58,15 +67,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Convertir la cadena de URLs separadas por comas en una lista
+        // Convertir las cadenas separadas por comas en listas
         String[] originsArray = corsAllowedOrigins.split(",");
-        List<String> allowedOrigins = List.of(originsArray);
+        String[] methodsArray = corsAllowedMethods.split(",");
+        String[] headersArray = corsAllowedHeaders.split(",");
         
-        configuration.setAllowedOrigins(allowedOrigins);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedOrigins(List.of(originsArray));
+        configuration.setAllowedMethods(List.of(methodsArray));
+        configuration.setAllowedHeaders(List.of(headersArray));
         configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(corsAllowCredentials);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
