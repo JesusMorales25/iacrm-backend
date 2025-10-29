@@ -1,5 +1,7 @@
 package com.chatgpt.backend.service.serviceImpl;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.chatgpt.backend.repository.sp.ReportesRepository;
 import com.chatgpt.backend.service.serviceInterface.ReportesService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,7 +30,14 @@ public class ReportesServiceImpl implements ReportesService {
         );
 
         try {
-            return mapper.readTree(json); // Devuelve un JsonNode
+            JsonNode base = mapper.readTree(json);
+            // Devolver siempre un objeto con 'metricas' como array vacío
+            ObjectNode response = mapper.createObjectNode();
+            response.set("metricas", mapper.createArrayNode());
+            response.set("total", base.get("total"));
+            response.set("inicio", base.get("inicio"));
+            response.set("fin", base.get("fin"));
+            return response;
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error al procesar el JSON del reporte", e);
         }
