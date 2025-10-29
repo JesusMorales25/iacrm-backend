@@ -29,16 +29,16 @@ public class LeadServiceImpl implements LeadService {
 
     @Override
     public List<LeadDTO> getLeadsDatos() {
-        List<Object[]> resultados = repository.obtenerLeads();
-        return resultados.stream()
-                .map(r -> new LeadDTO(
-                        (String) r[0],
-                        (String) r[1],
-                        (String) r[2],
-                        (String) r[3],
-                        (String) r[4]
-                ))
-                .toList();
+    List<Object[]> resultados = repository.obtenerLeads();
+    return resultados.stream()
+        .map(r -> new LeadDTO(
+            (String) r[1], // nombre
+            r[2] != null ? r[2].toString() : null, // numeroUsuario (telefono)
+            r[2] != null ? r[2].toString() : null, // telefono (igual que numeroUsuario)
+            (String) r[3], // correo
+            (String) r[4]  // categoria
+        ))
+        .toList();
     }
 
     @Override
