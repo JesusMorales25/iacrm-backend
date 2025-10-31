@@ -20,18 +20,14 @@ public class ReportesRepositoryImpl implements ReportesRepositoryCustom {
      * Obtiene reporte de métricas - SIMPLIFICADO usando public schema
      */
     public String obtenerReporte(java.sql.Timestamp inicio, java.sql.Timestamp fin) {
-    // Reporte básico con estadísticas del período
-    String sql = "SELECT COUNT(*) as total FROM public.conversacion WHERE fecha_hora BETWEEN ? AND ?";
+    // Ejecutar la función que retorna el JSON completo
+    String sql = "SELECT public.obtener_reporte_metricas(?, ?)";
     Query query = entityManager.createNativeQuery(sql);
-    query.setParameter(1, inicio);
-    query.setParameter(2, fin);
-
+    query.setParameter(1, inicio.toLocalDateTime().toLocalDate().toString());
+    query.setParameter(2, fin.toLocalDateTime().toLocalDate().toString());
     Object result = query.getSingleResult();
-    Long total = result != null ? ((Number) result).longValue() : 0L;
-
-    // Retornar un JSON válido
-    return String.format("{\"total\":%d,\"inicio\":\"%s\",\"fin\":\"%s\"}",
-        total, inicio.toString(), fin.toString());
+    // El resultado es un String JSON
+    return result != null ? result.toString() : "{}";
     }
 
     /**
