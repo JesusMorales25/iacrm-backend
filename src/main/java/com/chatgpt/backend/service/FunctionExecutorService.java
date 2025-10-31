@@ -319,19 +319,28 @@ import java.util.function.Supplier;
         }
 
         private void procesarAgendarCitaViaWebhook(Map<String, Object> function, String numero) throws Exception {
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, String> args = mapper.readValue((String) function.get("arguments"), Map.class);
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, String> args = mapper.readValue((String) function.get("arguments"), Map.class);
 
-            String nombre = args.get("nombre");
-            String correo = args.get("correo");
-            String telefono = args.get("telefono");
-            String fechaTexto = args.get("fecha");
-            String hora = args.get("hora");
-            String fecha = interpretarFechaNatural(fechaTexto);
-            String detalleServicio = args.get("detalleServicio");
+        String nombre = args.get("nombre");
+        String correo = args.get("correo");
+        String telefono = args.get("telefono");
+        String fechaTexto = args.get("fecha");
+        String hora = args.get("hora");
+        String fecha = interpretarFechaNatural(fechaTexto);
+        String detalleServicio = args.get("detalleServicio");
 
-            String webhookUrl = WEBHOOKURL_MAKE;
-            llamarWebhookCitaAgendada(webhookUrl, nombre, correo, telefono, fecha, hora, detalleServicio);
+        // Actualizar la categoría del contacto a PROSPECTO si no lo es aún
+        DatosContacto contacto = datosContactoRepository.findByNumeroUsuario(numero)
+            .orElse(null);
+        if (contacto != null && contacto.getCategoria() != CategoriaContacto.PROSPECTO) {
+            contacto.setCategoria(CategoriaContacto.PROSPECTO);
+            datosContactoRepository.save(contacto);
+            log.info("Contacto {} actualizado a PROSPECTO por agendar cita/demo/llamada", numero);
+        }
+
+        String webhookUrl = WEBHOOKURL_MAKE;
+        llamarWebhookCitaAgendada(webhookUrl, nombre, correo, telefono, fecha, hora, detalleServicio);
         }
         private void llamarWebhookGuardarContacto(String url, String nombre, String correo, String telefono, String numeroUsuario) {
             try {
