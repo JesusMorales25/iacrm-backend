@@ -11,5 +11,6 @@ import java.util.Optional;
 public interface DatosContactoRepository extends JpaRepository<DatosContacto, Long>, DatosContactoRepositoryCustom {
     Optional<DatosContacto> findByThreadId(String threadId);
     boolean existsByNumeroUsuario(String numeroUsuario);
+    Optional<DatosContacto> findByNumeroUsuario(String numeroUsuario);
 }
 
