@@ -30,14 +30,7 @@ public class ReportesServiceImpl implements ReportesService {
         );
 
         try {
-            JsonNode base = mapper.readTree(json);
-            // Devolver siempre un objeto con 'metricas' como array vacío
-            ObjectNode response = mapper.createObjectNode();
-            response.set("metricas", mapper.createArrayNode());
-            response.set("total", base.get("total"));
-            response.set("inicio", base.get("inicio"));
-            response.set("fin", base.get("fin"));
-            return response;
+            return mapper.readTree(json); // Devuelve el JSON completo de la BD
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error al procesar el JSON del reporte", e);
         }
